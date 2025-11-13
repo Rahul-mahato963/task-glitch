@@ -104,7 +104,7 @@ export function useTasks(): UseTasksState {
           if (!res.ok) return;
           const data = (await res.json()) as any[];
           const normalized = normalizeTasks(data);
-          setTasks(prev => [...prev, ...normalized]);
+          setTasks(normalized);
         } catch {
           // ignore
         }
@@ -155,19 +155,20 @@ export function useTasks(): UseTasksState {
     });
   }, []);
 
-  const deleteTask = useCallback((id: string) => {
-    setTasks(prev => {
-      const target = prev.find(t => t.id === id) || null;
-      setLastDeleted(target);
-      return prev.filter(t => t.id !== id);
-    });
-  }, []);
+ const deleteTask = useCallback((id: string) => {
+  setTasks(prev => {
+    const target = prev.find(t => t.id === id) || null;
+    setLastDeleted(target);
+    return prev.filter(t => t.id !== id);
+  });
+}, []);
 
-  const undoDelete = useCallback(() => {
-    if (!lastDeleted) return;
-    setTasks(prev => [...prev, lastDeleted]);
-    setLastDeleted(null);
-  }, [lastDeleted]);
+const undoDelete = useCallback(() => {
+  if (!lastDeleted) return;
+  setTasks(prev => [...prev, lastDeleted]); // Add lastDeleted back to the tasks array
+  setLastDeleted(null);
+}, [lastDeleted]);
+
 
   return { tasks, loading, error, derivedSorted, metrics, lastDeleted, addTask, updateTask, deleteTask, undoDelete };
 }
